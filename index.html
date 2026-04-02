@@ -181,8 +181,8 @@
     /* 结果页 */
     .result-page {
       display: none;
-      padding-top: 30px;
-      padding-bottom: 60px;
+      padding-top: 20px;
+      padding-bottom: 40px;
     }
 
     .result-page.active {
@@ -198,9 +198,9 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
-      margin-bottom: 40px;
-      padding: 40px 30px;
+      gap: 6px;
+      margin-bottom: 24px;
+      padding: 24px 30px;
       background: linear-gradient(180deg, transparent, rgba(184, 134, 11, 0.03));
       border-radius: 20px;
       position: relative;
@@ -231,8 +231,9 @@
       transition: all 0.3s ease;
     }
 
-    /* 阳爻 - 金色实线 */
+    /* 阳爻 - 金色实线，宽度等于阴爻总宽 */
     .yao.yang .yao-part {
+      width: calc(50px * 2 + 12px);
       background: linear-gradient(135deg, var(--gold-light), var(--gold));
       box-shadow: 0 1px 3px rgba(184, 134, 11, 0.3);
     }
@@ -251,7 +252,7 @@
       letter-spacing: 0.15em;
       margin-right: -0.15em;
       color: var(--ink);
-      margin-bottom: 8px;
+      margin-bottom: 4px;
       opacity: 0;
       animation: fadeUp 0.8s ease-out 0.7s forwards;
     }
@@ -261,7 +262,7 @@
       font-weight: 500;
       letter-spacing: 0.2em;
       margin-right: -0.2em;
-      margin-bottom: 8px;
+      margin-bottom: 4px;
       opacity: 0;
       animation: fadeUp 0.8s ease-out 0.75s forwards;
     }
@@ -278,7 +279,7 @@
       color: var(--ink-muted);
       letter-spacing: 0.3em;
       margin-right: -0.3em;
-      margin-bottom: 40px;
+      margin-bottom: 24px;
       opacity: 0;
       animation: fadeUp 0.8s ease-out 0.8s forwards;
     }
@@ -290,7 +291,7 @@
     }
 
     .section {
-      margin-bottom: 32px;
+      margin-bottom: 20px;
       opacity: 0;
       animation: fadeUp 0.8s ease-out forwards;
     }
@@ -303,14 +304,14 @@
       letter-spacing: 0.3em;
       margin-right: -0.3em;
       color: var(--gold);
-      margin-bottom: 12px;
+      margin-bottom: 8px;
       font-weight: 500;
     }
 
     .section-content {
       font-family: 'Noto Serif SC', serif;
       font-size: 17px;
-      line-height: 2;
+      line-height: 1.8;
       color: var(--ink-light);
     }
 
@@ -322,14 +323,14 @@
     .section-content.modern {
       font-family: 'Noto Sans SC', sans-serif;
       font-size: 15px;
-      line-height: 1.9;
+      line-height: 1.7;
       color: var(--ink-light);
     }
 
     /* 再占按钮 */
     .restart-btn {
-      margin-top: 40px;
-      padding: 16px 48px;
+      margin-top: 24px;
+      padding: 14px 40px;
       background: transparent;
       border: 1px solid rgba(26, 26, 26, 0.15);
       border-radius: 100px;
@@ -395,6 +396,10 @@
       .yao-part {
         width: 60px;
         height: 12px;
+      }
+
+      .yao.yang .yao-part {
+        width: calc(60px * 2 + 16px);
       }
 
       .yao {
