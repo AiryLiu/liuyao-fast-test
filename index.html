@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>六爻</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8f5f0;
+      --bg-deep: #f0ebe3;
+      --ink: #1a1a1a;
+      --ink-light: #4a4a4a;
+      --ink-muted: #8a8a8a;
+      --gold: #b8860b;
+      --gold-light: #d4a843;
+      --vermilion: #c24c40;
+      --shadow: rgba(26, 26, 26, 0.08);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: 'Noto Sans SC', sans-serif;
+      background-color: var(--bg);
+      color: var(--ink);
+      line-height: 1.8;
+      overflow-x: hidden;
+    }
+
+    /* 页面容器 */
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+      position: relative;
+    }
+
+    /* 宣纸纹理背景 */
+    .page::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image:
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* 首页 */
+    .home-page {
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 80px;
+      opacity: 0;
+      animation: fadeUp 1s ease-out 0.2s forwards;
+    }
+
+    .brand-title {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 48px;
+      font-weight: 700;
+      letter-spacing: 0.3em;
+      margin-right: -0.3em;
+      color: var(--ink);
+    }
+
+    .brand-subtitle {
+      font-size: 13px;
+      letter-spacing: 0.5em;
+      margin-right: -0.5em;
+      color: var(--ink-muted);
+      margin-top: 16px;
+      font-weight: 300;
+    }
+
+    /* 起卦按钮 */
+    .divine-btn {
+      position: relative;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, var(--bg-deep), var(--bg));
+      border: 1px solid rgba(26, 26, 26, 0.1);
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow:
+        0 2px 20px var(--shadow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      opacity: 0;
+      animation: fadeUp 1s ease-out 0.4s forwards;
+    }
+
+    .divine-btn::before {
+      content: '';
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      border-radius: 50%;
+      border: 1px solid var(--gold);
+      opacity: 0.3;
+      transition: all 0.4s ease;
+    }
+
+    .divine-btn:hover {
+      transform: scale(1.05);
+      box-shadow:
+        0 8px 40px var(--shadow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    .divine-btn:hover::before {
+      opacity: 1;
+      top: 15px;
+      left: 15px;
+      right: 15px;
+      bottom: 15px;
+    }
+
+    .divine-btn:active {
+      transform: scale(0.98);
+    }
+
+    .divine-btn-text {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      margin-right: -0.2em;
+      color: var(--ink);
+    }
+
+    /* 装饰圆环 */
+    .ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid var(--gold);
+      opacity: 0.15;
+      pointer-events: none;
+    }
+
+    .ring-1 {
+      width: 200px;
+      height: 200px;
+      animation: rotate 60s linear infinite;
+    }
+
+    .ring-2 {
+      width: 240px;
+      height: 240px;
+      animation: rotate 90s linear infinite reverse;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* 结果页 */
+    .result-page {
+      display: none;
+      padding-top: 30px;
+      padding-bottom: 60px;
+    }
+
+    .result-page.active {
+      display: flex;
+    }
+
+    .home-page.hidden {
+      display: none;
+    }
+
+    /* 卦象容器 */
+    .hexagram-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 40px;
+      padding: 40px 30px;
+      background: linear-gradient(180deg, transparent, rgba(184, 134, 11, 0.03));
+      border-radius: 20px;
+      position: relative;
+      opacity: 0;
+      animation: fadeUp 0.8s ease-out forwards;
+    }
+
+    /* 爻 */
+    .yao {
+      display: flex;
+      gap: 12px;
+      height: 10px;
+      opacity: 0;
+      animation: fadeUp 0.5s ease-out forwards;
+    }
+
+    .yao:nth-child(1) { animation-delay: 0.1s; }
+    .yao:nth-child(2) { animation-delay: 0.2s; }
+    .yao:nth-child(3) { animation-delay: 0.3s; }
+    .yao:nth-child(4) { animation-delay: 0.4s; }
+    .yao:nth-child(5) { animation-delay: 0.5s; }
+    .yao:nth-child(6) { animation-delay: 0.6s; }
+
+    .yao-part {
+      width: 50px;
+      height: 10px;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    /* 阳爻 - 金色实线 */
+    .yao.yang .yao-part {
+      background: linear-gradient(135deg, var(--gold-light), var(--gold));
+      box-shadow: 0 1px 3px rgba(184, 134, 11, 0.3);
+    }
+
+    /* 阴爻 - 墨色断线 */
+    .yao.yin .yao-part {
+      background: var(--ink);
+      box-shadow: 0 1px 3px var(--shadow);
+    }
+
+    /* 卦名 */
+    .gua-name {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      margin-right: -0.15em;
+      color: var(--ink);
+      margin-bottom: 8px;
+      opacity: 0;
+      animation: fadeUp 0.8s ease-out 0.7s forwards;
+    }
+
+    .gua-luck {
+      font-size: 18px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      margin-right: -0.2em;
+      margin-bottom: 8px;
+      opacity: 0;
+      animation: fadeUp 0.8s ease-out 0.75s forwards;
+    }
+
+    .gua-luck.luck-shangshang { color: #c24c40; }
+    .gua-luck.luck-shangzhong { color: #d4a843; }
+    .gua-luck.luck-zhongshang { color: #b8860b; }
+    .gua-luck.luck-zhongzhong { color: #6a6a6a; }
+    .gua-luck.luck-zhongxia { color: #5a7a8a; }
+    .gua-luck.luck-xiaxia { color: #3a5a6a; }
+
+    .gua-symbol {
+      font-size: 14px;
+      color: var(--ink-muted);
+      letter-spacing: 0.3em;
+      margin-right: -0.3em;
+      margin-bottom: 40px;
+      opacity: 0;
+      animation: fadeUp 0.8s ease-out 0.8s forwards;
+    }
+
+    /* 判词区域 */
+    .interpretation {
+      width: 100%;
+      max-width: 340px;
+    }
+
+    .section {
+      margin-bottom: 32px;
+      opacity: 0;
+      animation: fadeUp 0.8s ease-out forwards;
+    }
+
+    .section:nth-of-type(1) { animation-delay: 0.9s; }
+    .section:nth-of-type(2) { animation-delay: 1s; }
+
+    .section-label {
+      font-size: 12px;
+      letter-spacing: 0.3em;
+      margin-right: -0.3em;
+      color: var(--gold);
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+
+    .section-content {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 17px;
+      line-height: 2;
+      color: var(--ink-light);
+    }
+
+    .section-content.original {
+      font-size: 18px;
+      color: var(--ink);
+    }
+
+    .section-content.modern {
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 15px;
+      line-height: 1.9;
+      color: var(--ink-light);
+    }
+
+    /* 再占按钮 */
+    .restart-btn {
+      margin-top: 40px;
+      padding: 16px 48px;
+      background: transparent;
+      border: 1px solid rgba(26, 26, 26, 0.15);
+      border-radius: 100px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 14px;
+      letter-spacing: 0.2em;
+      margin-right: -0.2em;
+      color: var(--ink-muted);
+      opacity: 0;
+      animation: fadeUp 0.8s ease-out 1.1s forwards;
+    }
+
+    .restart-btn:hover {
+      border-color: var(--ink);
+      color: var(--ink);
+      background: var(--bg-deep);
+    }
+
+    /* 动画 */
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* 隐藏页面 */
+    .hidden {
+      display: none !important;
+    }
+
+    /* 响应式 */
+    @media (min-width: 768px) {
+      .brand-title {
+        font-size: 64px;
+      }
+
+      .divine-btn {
+        width: 160px;
+        height: 160px;
+      }
+
+      .divine-btn-text {
+        font-size: 22px;
+      }
+
+      .ring-1 {
+        width: 220px;
+        height: 220px;
+      }
+
+      .ring-2 {
+        width: 280px;
+        height: 280px;
+      }
+
+      .yao-part {
+        width: 60px;
+        height: 12px;
+      }
+
+      .yao {
+        gap: 16px;
+        height: 12px;
+      }
+
+      .gua-name {
+        font-size: 40px;
+      }
+
+      .interpretation {
+        max-width: 400px;
+      }
+    }
+
+    /* 加载过渡 */
+    .loading .divine-btn {
+      pointer-events: none;
+    }
+
+    .loading .divine-btn-text {
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+  <!-- 首页 -->
+  <div class="page home-page">
+    <div class="brand">
+      <h1 class="brand-title">六爻</h1>
+      <p class="brand-subtitle">心里默念问题，看看卦象给你的指引</p>
+    </div>
+
+    <button class="divine-btn" onclick="divine()">
+      <span class="divine-btn-text">起卦</span>
+    </button>
+
+    <div class="ring ring-1"></div>
+    <div class="ring ring-2"></div>
+  </div>
+
+  <!-- 结果页 -->
+  <div class="page result-page">
+    <div class="hexagram-container">
+      <!-- 爻会动态生成 -->
+    </div>
+
+    <h2 class="gua-name"></h2>
+    <p class="gua-luck"></p>
+    <p class="gua-symbol"></p>
+
+    <div class="interpretation">
+      <div class="section">
+        <div class="section-label">判词</div>
+        <div class="section-content original"></div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">解读</div>
+        <div class="section-content modern"></div>
+      </div>
+    </div>
+
+    <button class="restart-btn" onclick="restart()">再占一卦</button>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
